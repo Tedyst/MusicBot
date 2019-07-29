@@ -63,7 +63,6 @@ class MusicBot(discord.Client):
         if perms_file is None:
             perms_file = PermissionsDefaults.perms_file
 
-
         self.following = {}
         if aliases_file is None:
             aliases_file = AliasesDefault.aliases_file
@@ -3028,19 +3027,26 @@ class MusicBot(discord.Client):
 
     async def on_member_update(self, before, after):
         try:
-            for i in self.following:
-                if self.following[i][0] == after.id:
+            for guild_id in self.following:
+                if self.following[guild_id][0] == after.id:
                     song_url = ""
                     for act in after.activities:
                         if str(act) == "Spotify":
                             song_url = act.artist + ' ' + act.title
-                    if song_url == self.following[i][1]:
+                    if song_url == self.following[guild_id][1]:
                         return
                     if song_url == "":
                         return
-                    self.following[i][1] = song_url
-                    log.debug("Added song {} in guild {} because of /follow".format(song_url, i))
-                    await self.cmd_play(None, self.players[i], self.following[i][2],
+
+                    player = self.players[guild_id]
+
+                    self.following[guild_id][1] = song_url
+                    log.debug("Added song {} in guild {} because of /follow".format(song_url, guild_id))
+                    
+                    player.playlist.clear()
+                    await self.cmd_play(None, player, self.following[guild_id][2],
                                     after, self.permissions.for_user(after), "", song_url)
+                    player.skip()
+                    
         except Exception as e:
             log.error('Failed: '+ str(e))
