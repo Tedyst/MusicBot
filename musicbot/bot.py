@@ -62,7 +62,7 @@ class MusicBot(discord.Client):
         if perms_file is None:
             perms_file = PermissionsDefaults.perms_file
 
-        self.following = map()
+        self.following = {}
 
         self.players = {}
         self.exit_signal = None
@@ -1927,27 +1927,24 @@ class MusicBot(discord.Client):
 
         Follows a spotify user.
         """
+        try:
+            if self.following[message.guild.id]:
+                del self.following[message.guild.id]
+                return Response("Stopped following".format(), delete_after=15)
+        except:
+            pass
         ok = False
         for i in author.activities:
             if str(i) == "Spotify":
                 ok = True
                 player.playlist.clear()
-        if ok == False:
-            return Response("Spotify is not opened".format(), delete_after=15)
-        lastsong = ""
-        while ok is True:
-            ok = False
-            for i in discord.utils.get(message.author.id).activities:
-                if str(i) == "Spotify":
-                    ok = True
-                    song_url = i.artist + ' ' + i.title
-                    if lastsong == song_url:
-                        break
-                    else:
-                        lastsong = song_url
-                        await self.cmd_play(message, player, message.channel,
-                                            message.author, self.permissions.for_user(message.author), "", song_url)
-            await asyncio.sleep(5)
+                song_url = i.artist + ' ' + i.title
+                await self.cmd_play(message, player, message.channel,
+                                    message.author, self.permissions.for_user(message.author), "", song_url)
+                self.following[message.guild.id]=[author.id,None,message.channel]
+                player.skip()
+                return Response("Started following".format(), delete_after=15)
+        return Response("Spotify is not opened".format(), delete_after=15)
 
 
     async def cmd_shuffle(self, channel, player):
@@ -2953,5 +2950,21 @@ class MusicBot(discord.Client):
         return None
 
     async def on_member_update(self, before, after):
-        player = self.players[]
+        try:
+            for i in self.following:
+                if self.following[i][0] == after.id:
+                    song_url = ""
+                    for act in after.activities:
+                        if str(act) == "Spotify":
+                            song_url = act.artist + ' ' + act.title
+                    if song_url == self.following[i][1]:
+                        return
+                    if song_url == "":
+                        return
+                    self.following[i][1] = song_url
+                    log.debug("Added song {} in guild {} because of /follow".format(song_url, i))
+                    await self.cmd_play(None, self.players[i], self.following[i][2],
+                                    after, self.permissions.for_user(after), "", song_url)
+        except Exception as e:
+            log.error('Failed: '+ str(e))
         print(after)
