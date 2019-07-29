@@ -78,7 +78,7 @@ class PatchedBuff:
             return frame_array.tobytes()
 
     def _pprint_meter(self, perc, *, char='#', text='', shift=True):
-        tx, ty = get_terminal_size()
+        tx, _ = get_terminal_size()
 
         if shift:
             outstr = text + \
@@ -206,7 +206,7 @@ class MusicPlayer(EventEmitter, Serializable):
                     log.debug("Deleting file: {}".format(
                         os.path.relpath(entry.filename)))
                     filename = entry.filename
-                    for x in range(30):
+                    for _ in range(30):
                         try:
                             os.unlink(filename)
                             log.debug('File deleted: {0}'.format(filename))
@@ -351,8 +351,8 @@ class MusicPlayer(EventEmitter, Serializable):
     def from_json(cls, raw_json, bot, voice_client, playlist):
         try:
             return json.loads(raw_json, object_hook=Serializer.deserialize)
-        except Exception as e:
-            log.exception("Failed to deserialize player", e)
+        except:
+            log.exception("Failed to deserialize player")
 
     @property
     def current_entry(self):
