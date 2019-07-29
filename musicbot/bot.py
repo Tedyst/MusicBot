@@ -1948,6 +1948,7 @@ class MusicBot(discord.Client):
                 return Response("Stopped following".format(), delete_after=15)
         except:
             pass
+        self.following[message.guild.id]=[author.id,None,message.channel]
         for i in author.activities:
             if str(i) == "Spotify":
                 player.playlist.clear()
@@ -1958,7 +1959,7 @@ class MusicBot(discord.Client):
                 player.skip()
                 await self.safe_delete_message(message, quiet=True)
                 return Response("Started following".format(), delete_after=15)
-        return Response("Spotify is not opened".format(), delete_after=15)
+        return Response("Started following, but Spotify is not playing any music".format(), delete_after=15)
 
 
     async def cmd_shuffle(self, channel, player):
