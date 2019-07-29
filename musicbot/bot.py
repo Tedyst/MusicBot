@@ -64,12 +64,9 @@ class MusicBot(discord.Client):
             perms_file = PermissionsDefaults.perms_file
 
 
-<< << << < HEAD
         self.following = {}
-== == == =
         if aliases_file is None:
             aliases_file = AliasesDefault.aliases_file
->>>>>> > 0e353506f2b03ae1f7162ac55d3689f3a29ed6ef
 
         self.players = {}
         self.exit_signal = None
