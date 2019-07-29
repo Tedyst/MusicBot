@@ -2981,4 +2981,3 @@ class MusicBot(discord.Client):
                                     after, self.permissions.for_user(after), "", song_url)
         except Exception as e:
             log.error('Failed: '+ str(e))
-        print(after)
