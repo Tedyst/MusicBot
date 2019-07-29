@@ -58,8 +58,10 @@ class PatchedBuff:
             self.rmss.append(rms)
 
             max_rms = sorted(self.rmss)[-1]
-            meter_text = 'avg rms: {:.2f}, max rms: {:.2f} '.format(avg(self.rmss), max_rms)
-            self._pprint_meter(rms / max(1, max_rms), text=meter_text, shift=True)
+            meter_text = 'avg rms: {:.2f}, max rms: {:.2f} '.format(
+                avg(self.rmss), max_rms)
+            self._pprint_meter(rms / max(1, max_rms),
+                               text=meter_text, shift=True)
 
         return frame
 
@@ -79,9 +81,11 @@ class PatchedBuff:
         tx, ty = get_terminal_size()
 
         if shift:
-            outstr = text + "{}".format(char * (int((tx - len(text)) * perc) - 1))
+            outstr = text + \
+                "{}".format(char * (int((tx - len(text)) * perc) - 1))
         else:
-            outstr = text + "{}".format(char * (int(tx * perc) - 1))[len(text):]
+            outstr = text + \
+                "{}".format(char * (int(tx * perc) - 1))[len(text):]
 
         print(outstr.ljust(tx - 1), end='\r')
 
@@ -189,15 +193,18 @@ class MusicPlayer(EventEmitter, Serializable):
         if self._stderr_future.done() and self._stderr_future.exception():
             # I'm not sure that this would ever not be done if it gets to this point
             # unless ffmpeg is doing something highly questionable
-            self.emit('error', player=self, entry=entry, ex=self._stderr_future.exception())
+            self.emit('error', player=self, entry=entry,
+                      ex=self._stderr_future.exception())
 
         if not self.bot.config.save_videos and entry:
             if not isinstance(entry, StreamPlaylistEntry):
                 if any([entry.filename == e.filename for e in self.playlist.entries]):
-                    log.debug("Skipping deletion of \"{}\", found song in queue".format(entry.filename))
+                    log.debug(
+                        "Skipping deletion of \"{}\", found song in queue".format(entry.filename))
 
                 else:
-                    log.debug("Deleting file: {}".format(os.path.relpath(entry.filename)))
+                    log.debug("Deleting file: {}".format(
+                        os.path.relpath(entry.filename)))
                     filename = entry.filename
                     for x in range(30):
                         try:
@@ -206,12 +213,15 @@ class MusicPlayer(EventEmitter, Serializable):
                             break
                         except PermissionError as e:
                             if e.winerror == 32:  # File is in use
-                                log.error('Can\'t delete file, it is currently in use: {0}').format(filename)
+                                log.error('Can\'t delete file, it is currently in use: {0}').format(
+                                    filename)
                         except FileNotFoundError:
-                            log.debug('Could not find delete {} as it was not found. Skipping.'.format(filename), exc_info=True)
+                            log.debug('Could not find delete {} as it was not found. Skipping.'.format(
+                                filename), exc_info=True)
                             break
                         except Exception:
-                            log.error("Error trying to delete {}".format(filename), exc_info=True)
+                            log.error("Error trying to delete {}".format(
+                                filename), exc_info=True)
                             break
                     else:
                         print("[Config:SaveVideos] Could not delete file {}, giving up and moving on".format(
@@ -270,7 +280,8 @@ class MusicPlayer(EventEmitter, Serializable):
                 else:
                     aoptions = "-vn"
 
-                log.ffmpeg("Creating player with options: {} {} {}".format(boptions, aoptions, entry.filename))
+                log.ffmpeg("Creating player with options: {} {} {}".format(
+                    boptions, aoptions, entry.filename))
 
                 source = PCMVolumeTransformer(
                     FFmpegPCMAudio(
@@ -281,7 +292,8 @@ class MusicPlayer(EventEmitter, Serializable):
                     ),
                     self.volume
                 )
-                log.debug('Playing {0} using {1}'.format(source, self.voice_client))
+                log.debug('Playing {0} using {1}'.format(
+                    source, self.voice_client))
                 self.voice_client.play(source, after=self._playback_finished)
 
                 self._current_player = self.voice_client
@@ -294,7 +306,8 @@ class MusicPlayer(EventEmitter, Serializable):
 
                 stderr_thread = Thread(
                     target=filter_stderr,
-                    args=(self._current_player._player.source.original._process, self._stderr_future),
+                    args=(
+                        self._current_player._player.source.original._process, self._stderr_future),
                     name="stderr reader"
                 )
 
@@ -341,7 +354,6 @@ class MusicPlayer(EventEmitter, Serializable):
         except Exception as e:
             log.exception("Failed to deserialize player", e)
 
-
     @property
     def current_entry(self):
         return self._current_entry
@@ -373,7 +385,8 @@ class MusicPlayer(EventEmitter, Serializable):
 
 # TODO: I need to add a check for if the eventloop is closed
 
-def filter_stderr(popen:subprocess.Popen, future:asyncio.Future):
+
+def filter_stderr(popen: subprocess.Popen, future: asyncio.Future):
     last_ex = None
 
     while True:
@@ -390,7 +403,7 @@ def filter_stderr(popen:subprocess.Popen, future:asyncio.Future):
                 last_ex = e
 
             except FFmpegWarning:
-                pass # useless message
+                pass  # useless message
         else:
             break
 
@@ -399,12 +412,13 @@ def filter_stderr(popen:subprocess.Popen, future:asyncio.Future):
     else:
         future.set_result(True)
 
-def check_stderr(data:bytes):
+
+def check_stderr(data: bytes):
     try:
         data = data.decode('utf8')
     except:
         log.ffmpeg("Unknown error decoding message from ffmpeg", exc_info=True)
-        return True # fuck it
+        return True  # fuck it
 
     # log.ffmpeg("Decoded data from ffmpeg: {}".format(data))
 
@@ -419,7 +433,8 @@ def check_stderr(data:bytes):
         "decode_band_types: Input buffer exhausted before END element found"
     ]
     errors = [
-        "Invalid data found when processing input", # need to regex this properly, its both a warning and an error
+        # need to regex this properly, its both a warning and an error
+        "Invalid data found when processing input",
     ]
 
     if any(msg in data for msg in warnings):

@@ -62,6 +62,8 @@ class MusicBot(discord.Client):
         if perms_file is None:
             perms_file = PermissionsDefaults.perms_file
 
+        self.following = map()
+
         self.players = {}
         self.exit_signal = None
         self.init_ok = False
@@ -1917,6 +1919,37 @@ class MusicBot(discord.Client):
         else:
             raise exceptions.CommandError(self.str.get('cmd-resume-none', 'Player is not paused.'), expire_in=30)
 
+
+    async def cmd_follow(self, player, message, author):
+        """
+        Usage:
+            {command_prefix}follow
+
+        Follows a spotify user.
+        """
+        ok = False
+        for i in author.activities:
+            if str(i) == "Spotify":
+                ok = True
+                player.playlist.clear()
+        if ok == False:
+            return Response("Spotify is not opened".format(), delete_after=15)
+        lastsong = ""
+        while ok is True:
+            ok = False
+            for i in discord.utils.get(message.author.id).activities:
+                if str(i) == "Spotify":
+                    ok = True
+                    song_url = i.artist + ' ' + i.title
+                    if lastsong == song_url:
+                        break
+                    else:
+                        lastsong = song_url
+                        await self.cmd_play(message, player, message.channel,
+                                            message.author, self.permissions.for_user(message.author), "", song_url)
+            await asyncio.sleep(5)
+
+
     async def cmd_shuffle(self, channel, player):
         """
         Usage:
@@ -2918,3 +2951,7 @@ class MusicBot(discord.Client):
             if vc.guild == guild:
                 return vc
         return None
+
+    async def on_member_update(self, before, after):
+        player = self.players[]
+        print(after)
