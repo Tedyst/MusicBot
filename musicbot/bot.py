@@ -1926,6 +1926,7 @@ class MusicBot(discord.Client):
 
         Follows a spotify user.
         """
+        await self.safe_delete_message(message, quiet=True)
         try:
             if self.following[message.guild.id]:
                 return Response("I am following <@{}>".format(self.following[message.guild.id][0]), delete_after=15)
@@ -1943,19 +1944,19 @@ class MusicBot(discord.Client):
         try:
             if self.following[message.guild.id]:
                 del self.following[message.guild.id]
+                await self.safe_delete_message(message, quiet=True)
                 return Response("Stopped following".format(), delete_after=15)
         except:
             pass
-        ok = False
         for i in author.activities:
             if str(i) == "Spotify":
-                ok = True
                 player.playlist.clear()
                 song_url = i.artist + ' ' + i.title
                 await self.cmd_play(message, player, message.channel,
                                     message.author, self.permissions.for_user(message.author), "", song_url)
                 self.following[message.guild.id]=[author.id,None,message.channel]
                 player.skip()
+                await self.safe_delete_message(message, quiet=True)
                 return Response("Started following".format(), delete_after=15)
         return Response("Spotify is not opened".format(), delete_after=15)
 
