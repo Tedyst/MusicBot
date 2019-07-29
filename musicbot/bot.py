@@ -1079,8 +1079,8 @@ class MusicBot(discord.Client):
         """Provides a basic template for embeds"""
         e = discord.Embed()
         e.colour = 7506394
-        e.set_footer(text='Just-Some-Bots/MusicBot ({})'.format(BOTVERSION), icon_url='https://i.imgur.com/gFHBoZA.png')
-        e.set_author(name=self.user.name, url='https://github.com/Just-Some-Bots/MusicBot', icon_url=self.user.avatar_url)
+        e.set_footer(text='Tedyst/MusicBot ({})'.format(BOTVERSION), icon_url='https://i.imgur.com/gFHBoZA.png')
+        e.set_author(name=self.user.name, url='https://github.com/Tedyst/MusicBot', icon_url=self.user.avatar_url)
         return e
 
     async def cmd_resetplaylist(self, player, channel):
@@ -1918,6 +1918,19 @@ class MusicBot(discord.Client):
 
         else:
             raise exceptions.CommandError(self.str.get('cmd-resume-none', 'Player is not paused.'), expire_in=30)
+
+    async def cmd_following(self, message):
+        """
+        Usage:
+            {command_prefix}following
+
+        Follows a spotify user.
+        """
+        try:
+            if self.following[message.guild.id]:
+                return Response("I am following <@{}>".format(self.following[message.guild.id][0]), delete_after=15)
+        except:
+            return Response("I am not following anybody.".format(), delete_after=15)
 
 
     async def cmd_follow(self, player, message, author):
