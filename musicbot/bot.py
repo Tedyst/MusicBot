@@ -3102,12 +3102,15 @@ class MusicBot(discord.Client):
                     player = self.players[guild_id]
 
                     self.following[guild_id][1] = song_url
-                    log.debug("Added song {} in guild {} because of /follow".format(song_url, guild_id))
-                    
+                    log.info("Added song {} in guild {} because of /follow".format(song_url, guild_id))
                     player.playlist.clear()
                     await self.cmd_play(None, player, self.following[guild_id][2],
                                     after, self.permissions.for_user(after), "", song_url)
-                    player.skip()
-                    
+                    if player.current_entry.duration > 0:
+                        percentage = player.progress / player.current_entry.duration * 100
+                        log.info("Percentage is at {}".format(percentage))
+                        if percentage < 50:
+                            player.skip()
+
         except Exception as e:
             log.error('Failed: '+ str(e))

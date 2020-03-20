@@ -19,11 +19,11 @@ RUN apt update \
   python3-pip \
   python3.7
 
+# Added piwheels to make the builds faster
 ARG TARGETPLATFORM
 RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
   printf "[global]\nextra-index-url=https://www.piwheels.org/simple" | touch /etc/pip.conf; \
   fi
-
 
 COPY requirements.txt .
 
