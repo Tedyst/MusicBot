@@ -1989,10 +1989,10 @@ class MusicBot(discord.Client):
             return Response("I am not following anybody.".format(), delete_after=15)
 
 
-    async def cmd_follow(self, player, message, author):
+    async def cmd_follow(self, player, message, author, user_mentions):
         """
         Usage:
-            {command_prefix}follow
+            {command_prefix}follow @UserName
 
         Follows a spotify user.
         """
@@ -2003,14 +2003,19 @@ class MusicBot(discord.Client):
                 return Response("Stopped following".format(), delete_after=15)
         except:
             pass
-        self.following[message.guild.id]=[author.id,None,message.channel]
-        for i in author.activities:
+        target = author
+        if user_mentions:
+            for user in user_mentions:
+                target = user
+                break
+        self.following[message.guild.id]=[target.id,None,message.channel]
+        for i in target.activities:
             if str(i) == "Spotify":
                 player.playlist.clear()
                 song_url = i.artist + ' ' + i.title
                 await self.cmd_play(message, player, message.channel,
-                                    message.author, self.permissions.for_user(message.author), "", song_url)
-                self.following[message.guild.id]=[author.id,None,message.channel]
+                                    target, self.permissions.for_user(target), "", song_url)
+                self.following[message.guild.id]=[target.id,None,message.channel]
                 player.skip()
                 await self.safe_delete_message(message, quiet=True)
                 return Response("Started following".format(), delete_after=15)
