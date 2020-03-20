@@ -1,8 +1,7 @@
-FROM python:3.8
+FROM debian:buster
 
 # Add project source
 WORKDIR /usr/src/musicbot
-COPY requirements.txt .
 
 # Install dependencies
 RUN apt update \
@@ -10,18 +9,27 @@ RUN apt update \
   ca-certificates \
   ffmpeg \
   opus-tools \
-  python3 \
   libsodium-dev \
   gcc \
   git \
   libffi-dev \
   make \
   musl-dev \
-  \
-  # Install pip dependencies
-  && pip install --no-cache-dir wheel \
-  && pip install --no-cache-dir -r requirements.txt \
-  && pip install --upgrade --force-reinstall --version websockets==4.0.1 
+  python3-nacl \
+  python3-pip \
+  python3.7
+
+ARG TARGETPLATFORM
+RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+  printf "[global]\nextra-index-url=https://www.piwheels.org/simple" | touch /etc/pip.conf; \
+  fi
+
+
+COPY requirements.txt .
+
+RUN pip3 install --no-cache-dir wheel pynacl \
+  && pip3 install --no-cache-dir -r requirements.txt \
+  && pip3 install --upgrade --force-reinstall --version websockets==4.0.1 
 
 # Create volume for mapping the config
 VOLUME /usr/src/musicbot/config
