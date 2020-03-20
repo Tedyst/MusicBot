@@ -3116,7 +3116,6 @@ class MusicBot(discord.Client):
                         log.info("Percentage is at {}".format(percentage))
                         if percentage < 50:
                             player.skip()
-                            player.skip()
 
         except Exception as e:
             log.error('Failed: '+ str(e))
