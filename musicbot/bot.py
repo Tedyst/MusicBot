@@ -1314,6 +1314,7 @@ class MusicBot(discord.Client):
             {command_prefix}play song_link
             {command_prefix}play text to search for
             {command_prefix}play spotify_uri
+            maestre
 
         Adds the song to the playlist.  If a link is not provided, the first
         result from a youtube search is added to the queue.
@@ -2706,10 +2707,12 @@ class MusicBot(discord.Client):
     async def on_message(self, message):
         await self.wait_until_ready()
 
-        message_content = message.content.strip()
-        if not message_content.startswith(self.config.command_prefix):
-            return
-
+        message_content = message.content.strip().lower()
+        if not message_content.startswith("maestre"):
+            message_content = message_content.replace("muzica", "")
+            if not message_content.startswith(self.config.command_prefix):
+                return
+        
         if message.author == self.user:
             log.warning("Ignoring command from myself ({})".format(message.content))
             return
@@ -2723,6 +2726,8 @@ class MusicBot(discord.Client):
 
         command, *args = message_content.split(' ')  # Uh, doesn't this break prefixes with spaces in them (it doesn't, config parser already breaks them)
         command = command[len(self.config.command_prefix):].lower().strip()
+        if message_content.startswith("maestre"):
+            command = "play"
 
         # [] produce [''] which is not what we want (it break things)
         if args:
@@ -3110,6 +3115,7 @@ class MusicBot(discord.Client):
                         percentage = player.progress / player.current_entry.duration * 100
                         log.info("Percentage is at {}".format(percentage))
                         if percentage < 50:
+                            player.skip()
                             player.skip()
 
         except Exception as e:
