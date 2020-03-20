@@ -29,7 +29,8 @@ COPY requirements.txt .
 
 RUN pip3 install --no-cache-dir wheel pynacl \
   && pip3 install --no-cache-dir -r requirements.txt \
-  && pip3 install --upgrade --force-reinstall --version websockets==4.0.1 
+  && pip3 install --upgrade --force-reinstall --version websockets==4.0.1 \
+  && python3 -m pip install -U https://github.com/Rapptz/discord.py/archive/master.zip#egg=discord.py[voice]
 
 # Create volume for mapping the config
 VOLUME /usr/src/musicbot/config
