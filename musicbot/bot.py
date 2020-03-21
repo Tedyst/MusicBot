@@ -1352,6 +1352,7 @@ class MusicBot(discord.Client):
             if song_url.startswith('spotify:'):
                 parts = song_url.split(":")
                 try:
+                    # spotify:playlist:4IOl8MrXPWvHVxo2NpSxwP
                     if 'track' in parts:
                         res = await self.spotify.get_track(parts[-1])
                         song_url = res['artists'][0]['name'] + ' ' + res['name'] 
@@ -2707,9 +2708,10 @@ class MusicBot(discord.Client):
     async def on_message(self, message):
         await self.wait_until_ready()
 
-        message_content = message.content.strip().lower()
-        if not message_content.startswith("maestre"):
-            message_content = message_content.replace("muzica", "")
+        message_content = message.content.strip()
+        if not message_content.lower().startswith("maestre"):
+            if "muzica" in message_content:
+                message_content = message_content.lower().replace("muzica", "")
             if not message_content.startswith(self.config.command_prefix):
                 return
         
@@ -2724,8 +2726,10 @@ class MusicBot(discord.Client):
         if (not isinstance(message.channel, discord.abc.GuildChannel)) and (not isinstance(message.channel, discord.abc.PrivateChannel)):
             return
 
+
         command, *args = message_content.split(' ')  # Uh, doesn't this break prefixes with spaces in them (it doesn't, config parser already breaks them)
         command = command[len(self.config.command_prefix):].lower().strip()
+
         if message_content.startswith("maestre"):
             command = "play"
 
