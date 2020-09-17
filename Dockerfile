@@ -1,4 +1,4 @@
-FROM debian:buster
+added versionFROM debian:buster@sha256:439a6bae1ef351ba9308fc9a5e69ff7754c14516f6be8ca26975fb564cb7fb76
 
 # Add project source
 WORKDIR /usr/src/musicbot
@@ -27,10 +27,7 @@ RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ] || [ "$TARGETPLATFORM" = "linux/ar
 
 COPY requirements.txt .
 
-RUN pip3 install --no-cache-dir wheel pynacl \
-  && pip3 install --no-cache-dir -r requirements.txt \
-  && pip3 install --upgrade --force-reinstall --version websockets==4.0.1 \
-  && python3 -m pip install -U https://github.com/Rapptz/discord.py/archive/master.zip#egg=discord.py[voice]
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # I don't even know why this is needed
 RUN update-ca-certificates -f -v
