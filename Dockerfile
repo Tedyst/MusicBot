@@ -1,4 +1,4 @@
-added versionFROM debian:buster@sha256:439a6bae1ef351ba9308fc9a5e69ff7754c14516f6be8ca26975fb564cb7fb76
+FROM debian:buster@sha256:439a6bae1ef351ba9308fc9a5e69ff7754c14516f6be8ca26975fb564cb7fb76
 
 # Add project source
 WORKDIR /usr/src/musicbot

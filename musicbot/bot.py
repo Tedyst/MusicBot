@@ -63,6 +63,8 @@ class MusicBot(discord.Client):
             perms_file = PermissionsDefaults.perms_file
 
         self.following = {}
+        self.following_percentage = {}
+
         if aliases_file is None:
             aliases_file = AliasesDefault.aliases_file
 
@@ -421,7 +423,7 @@ class MusicBot(discord.Client):
     def get_player_in(self, guild:discord.Guild) -> MusicPlayer:
         return self.players.get(guild.id)
 
-    async def get_player(self, channel, create=False, *, deserialize=False) -> MusicPlayer:
+    async def get_player(self, channel, create=True, *, deserialize=False) -> MusicPlayer:
         guild = channel.guild
 
         async with self.aiolocks[_func_() + ':' + str(guild.id)]:
@@ -2023,6 +2025,38 @@ class MusicBot(discord.Client):
                 return Response("Started following".format(), delete_after=15)
         return Response("Started following, but Spotify is not playing any music".format(), delete_after=15)
 
+    async def cmd_followpercentage(self, player, message, author, user_mentions):
+        """
+        Usage:
+            {command_prefix}follow @UserName
+
+        Follows a spotify user.
+        """
+        try:
+            if self.following[message.guild.id]:
+                del self.following[message.guild.id]
+                await self.safe_delete_message(message, quiet=True)
+                return Response("Stopped following".format(), delete_after=15)
+        except:
+            pass
+        target = author
+        if user_mentions:
+            for user in user_mentions:
+                target = user
+                break
+        self.following[message.guild.id]=[target.id,None,message.channel]
+        for i in target.activities:
+            if str(i) == "Spotify":
+                player.playlist.clear()
+                song_url = i.artist + ' ' + i.title
+                await self.cmd_play(message, player, message.channel,
+                                    target, self.permissions.for_user(target), "", song_url)
+                self.following[message.guild.id]=[target.id,None,message.channel]
+                player.skip()
+                await self.safe_delete_message(message, quiet=True)
+                return Response("Started following".format(), delete_after=15)
+        return Response("Started following, but Spotify is not playing any music".format(), delete_after=15)
+
 
     async def cmd_shuffle(self, channel, player):
         """
@@ -3103,9 +3137,9 @@ class MusicBot(discord.Client):
                     for act in after.activities:
                         if str(act) == "Spotify":
                             song_url = act.artist + ' ' + act.title
-                    if song_url == self.following[guild_id][1]:
-                        return
                     if song_url == "":
+                        return
+                    if song_url == self.following[guild_id][1]:
                         return
 
                     player = self.players[guild_id]
