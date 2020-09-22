@@ -841,6 +841,7 @@ class MusicBot(discord.Client):
 
 #######################################################################################################################
 
+
     async def safe_send_message(self, dest, content, **kwargs):
         tts = kwargs.pop('tts', False)
         quiet = kwargs.pop('quiet', False)
@@ -1319,6 +1320,8 @@ class MusicBot(discord.Client):
 
         Toggles looping state
         """
+        if player.playlist.looping:
+            player.playlist.entries.popleft()
         player.playlist.looping = not player.playlist.looping
         return Response(self.str.get('cmd-loop', 'Looping state is now `{0}`').format(player.playlist.looping), reply=True, delete_after=35)
 
@@ -2306,11 +2309,14 @@ class MusicBot(discord.Client):
 
         current_entry = player.current_entry
 
+        looping_state = player.playlist.looping
+        player.playlist.looping = False
         if (param.lower() in ['force', 'f']) or self.config.legacy_skip:
             if permissions.instaskip \
                     or (self.config.allow_author_skip and author == player.current_entry.meta.get('author', None)):
 
                 player.skip()  # TODO: check autopause stuff here
+                player.playlist.looping = looping_state
                 await self._manual_delete_check(message)
                 return Response(self.str.get('cmd-skip-force', 'Force skipped `{}`.').format(current_entry.title), reply=True, delete_after=30)
             else:
@@ -2336,6 +2342,9 @@ class MusicBot(discord.Client):
         if skips_remaining <= 0:
             player.skip()  # check autopause stuff here
             # @TheerapakG: Check for pausing state in the player.py make more sense
+            if looping_state:
+                player.playlist.entries.popleft()
+            player.playlist.looping = looping_state
             return Response(
                 self.str.get('cmd-skip-reply-skipped-1', 'Your skip for `{0}` was acknowledged.\nThe vote to skip has been passed.{1}').format(
                     current_entry.title,

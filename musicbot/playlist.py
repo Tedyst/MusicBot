@@ -344,10 +344,10 @@ class Playlist(EventEmitter, Serializable):
         if not self.entries:
             return None
 
-        entry = self.entries.popleft()
+        entry = self.entries[0]
 
-        if self.looping is True:
-            self.entries.appendleft(entry)
+        if self.looping is False:
+            self.entries.popleft()
 
         if predownload_next:
             next_entry = self.peek()
