@@ -840,7 +840,6 @@ class MusicBot(discord.Client):
 
 #######################################################################################################################
 
-
     async def safe_send_message(self, dest, content, **kwargs):
         tts = kwargs.pop('tts', False)
         quiet = kwargs.pop('quiet', False)
@@ -2924,6 +2923,12 @@ class MusicBot(discord.Client):
 
         if message_content.startswith("maestre"):
             command = "play"
+
+        if command == "play":
+            voice_client = self.voice_client_in(message.guild)
+            if not voice_client or message.guild != message.author.voice.channel.guild:
+                await self.cmd_summon(message.channel, message.guild,
+                                      message.author, message.guild.me.voice.channel if message.guild.me.voice else None)
 
         # [] produce [''] which is not what we want (it break things)
         if args:
