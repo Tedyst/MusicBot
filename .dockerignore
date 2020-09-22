@@ -17,6 +17,8 @@ Dockerfile
 .gitattributes
 .gitignore
 
+venv/
+
 # IDE
 .idea/
 .vscode/
