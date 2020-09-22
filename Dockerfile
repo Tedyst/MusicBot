@@ -39,4 +39,7 @@ ENV APP_ENV=docker
 
 ENTRYPOINT ["python3", "dockerentry.py"]
 
+ARG COMMIT=""
+ENV VERSION=${COMMIT}
+
 COPY . ./
