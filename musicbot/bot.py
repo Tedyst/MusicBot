@@ -654,6 +654,7 @@ class MusicBot(discord.Client):
             await self.serialize_queue(player.voice_client.channel.guild)
 
         if not player.is_stopped and not player.is_dead:
+
             player.play(_continue=True)
 
     async def on_player_entry_added(self, player, playlist, entry, **_):
@@ -1310,6 +1311,16 @@ class MusicBot(discord.Client):
         else:
             usr = user_mentions[0]
             return Response(self.str.get('cmd-id-other', '**{0}**s ID is `{1}`').format(usr.name, usr.id), reply=True, delete_after=35)
+
+    async def cmd_loop(self, author, player):
+        """
+        Usage:
+            {command_prefix}loop
+
+        Toggles looping state
+        """
+        player.playlist.looping = not player.playlist.looping
+        return Response(self.str.get('cmd-loop', 'Looping state is now `{0}`').format(player.playlist.looping), reply=True, delete_after=35)
 
     async def cmd_save(self, player, url=None):
         """

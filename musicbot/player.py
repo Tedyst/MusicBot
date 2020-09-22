@@ -198,6 +198,7 @@ class MusicPlayer(EventEmitter, Serializable):
     def kill(self):
         self.state = MusicPlayerState.DEAD
         self.playlist.clear()
+        self.playlist.looping = False
         self._events.clear()
         self._kill_current_player()
 
